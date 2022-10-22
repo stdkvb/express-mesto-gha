@@ -29,10 +29,10 @@ const deleteCard = (req, res) => {
 
 const likeCard = (req, res) => {
   const owner = req.user._id;
-  Card.findOneAndUpdate(req.params.cardId, {$addToSet: {likes: owner}}, { new: true })
+  Card.findOneAndUpdate(req.params.cardId, { $addToSet: { likes: owner } }, { new: true })
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Запрашиваемая карточка не найдена'});
+        res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
         return;
       }
       res.status(200).send(card);
@@ -42,10 +42,10 @@ const likeCard = (req, res) => {
 
 const disLikeCard = (req, res) => {
   const owner = req.user._id;
-  Card.findOneAndUpdate(req.params.cardId, {$pull: {likes: owner}}, { new: true })
+  Card.findOneAndUpdate(req.params.cardId, { $pull: { likes: owner } }, { new: true })
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Запрашиваемая карточка не найдена'});
+        res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
         return;
       }
       res.status(200).send(card);
@@ -53,4 +53,6 @@ const disLikeCard = (req, res) => {
     .catch((err) => res.status(500).send({ message: err.message }));
 };
 
-module.exports = { createCard, getCard, deleteCard, likeCard, disLikeCard };
+module.exports = {
+  createCard, getCard, deleteCard, likeCard, disLikeCard,
+};
