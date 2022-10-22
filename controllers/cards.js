@@ -33,7 +33,7 @@ const deleteCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(NotFound).send({ message: 'Карточка с указанным _id не найдена.' });
+        res.status(ErrorCode).send({ message: 'Карточка с указанным _id не найдена.' });
         return;
       }
       res.status(DefaultError).send({ message: 'Ошибка сервера.' });
@@ -42,7 +42,10 @@ const deleteCard = (req, res) => {
 
 const likeCard = (req, res) => {
   const owner = req.user._id;
-  Card.findOneAndUpdate(req.params.cardId, { $addToSet: { likes: owner } }, { new: true })
+  Card.findOneAndUpdate(
+    req.params.cardId,
+    { $addToSet: { likes: owner } },
+    { new: true, runValidators: true })
     .then((card) => {
       if (!card) {
         res.status(NotFound).send({ message: 'Переданы некорректные данные для постановки лайка.' });
@@ -63,7 +66,10 @@ const likeCard = (req, res) => {
 
 const disLikeCard = (req, res) => {
   const owner = req.user._id;
-  Card.findOneAndUpdate(req.params.cardId, { $pull: { likes: owner } }, { new: true })
+  Card.findOneAndUpdate(
+    req.params.cardId,
+    { $pull: { likes: owner } },
+    { new: true, runValidators: true })
     .then((card) => {
       if (!card) {
         res.status(NotFound).send({ message: 'Переданы некорректные данные для снятия лайка.' });
