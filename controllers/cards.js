@@ -1,0 +1,74 @@
+const Card = require('../models/card');
+
+const getCards = (req, res) => {
+  Card.find({})
+    .then((cards) => res.send(cards))
+    .catch(() => res.status(500).send({ message: 'Ошибка сервера.' }));
+};
+
+const createCard = (req, res) => {
+  const { name, link } = req.body;
+  const owner = req.user._id;
+  Card.create({ name, link, owner })
+    .then((card) => res.send(card))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Переданы некорректные данные при создании карточки' });
+        return;
+      }
+      res.status(500).send({ message: 'Ошибка сервера.' });
+    });
+};
+
+const deleteCard = (req, res) => {
+  const { cardId } = req.params;
+  Card.findByIdAndRemove(cardId)
+    .then((card) => {
+      res.send(card);
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(404).send({ message: 'Карточка с указанным _id не найдена.' });
+        return;
+      }
+      res.status(500).send({ message: 'Ошибка сервера.' });
+    });
+};
+
+const likeCard = (req, res) => {
+  const owner = req.user._id;
+  Card.findOneAndUpdate(req.params.cardId, { $addToSet: { likes: owner } }, { new: true })
+    .then((card) => {
+      res.send(card);
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(404).send({ message: 'Передан несуществующий _id карточки.' });
+      } else if (err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Переданы некорректные данные для постановки лайка.' });
+      } else {
+        res.status(500).send({ message: 'Ошибка сервера.' });
+      }
+    });
+};
+
+const disLikeCard = (req, res) => {
+  const owner = req.user._id;
+  Card.findOneAndUpdate(req.params.cardId, { $pull: { likes: owner } }, { new: true })
+    .then((card) => {
+      res.send(card);
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(404).send({ message: 'Передан несуществующий _id карточки.' });
+      } else if (err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Переданы некорректные данные для снятия лайка.' });
+      } else {
+        res.status(500).send({ message: 'Ошибка сервера.' });
+      }
+    });
+};
+
+module.exports = {
+  createCard, getCards, deleteCard, likeCard, disLikeCard,
+};
