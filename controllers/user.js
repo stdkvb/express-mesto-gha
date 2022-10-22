@@ -34,4 +34,46 @@ const createUser = (req, res) => {
     });
 };
 
-module.exports = { getUsers, getUser, createUser };
+const updateUser = (req, res) => {
+  const owner = req.user._id;
+  const { name, about } = req.body;
+  User.findByIdAndUpdate(owner, { name, about })
+    .then((user) => {
+      res.status(200).send({
+        _id: owner,
+        name,
+        about,
+        avatar: user.avatar,
+      })
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(422).send({ message: err.name });
+        return;
+      }
+      res.status(500).send({ message: err.message });
+    });
+};
+
+const updateAvatar = (req, res) => {
+  const owner = req.user._id;
+  const { avatar } = req.body;
+  User.findByIdAndUpdate(owner, { avatar })
+    .then((user) => {
+      res.status(200).send({
+        _id: owner,
+        name: user.name,
+        about: user.about,
+        avatar,
+      })
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(422).send({ message: err.name });
+        return;
+      }
+      res.status(500).send({ message: err.message });
+    });
+}
+
+module.exports = { getUsers, getUser, createUser, updateUser, updateAvatar };
