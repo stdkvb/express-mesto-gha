@@ -1,9 +1,10 @@
 const User = require('../models/user');
+const { ErrorCode, NotFound, DefaultError } = require('../errors/errors');
 
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch(() => res.status(500).send({ message: 'Ошибка сервера.' }));
+    .catch(() => res.status(DefaultError).send({ message: 'Ошибка сервера.' }));
 };
 
 const getUser = (req, res) => {
@@ -11,14 +12,18 @@ const getUser = (req, res) => {
 
   User.findById(userId)
     .then((user) => {
-      res.send(user);
+      if (!user) {
+        res.status(NotFound).send({ message: 'Пользователь по указанному _id не найден.' });
+      } else {
+        res.send(user);
+      }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(404).send({ message: 'Пользователь по указанному _id не найден.' });
+        res.status(ErrorCode).send({ message: 'Пользователь по указанному _id не найден.' });
         return;
       }
-      res.status(500).send({ message: 'Ошибка сервера.' });
+      res.status(DefaultError).send({ message: 'Ошибка сервера.' });
     });
 };
 
@@ -29,10 +34,10 @@ const createUser = (req, res) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.' });
+        res.status(ErrorCode).send({ message: err.message });
         return;
       }
-      res.status(500).send({ message: 'Ошибка сервера.' });
+      res.status(DefaultError).send({ message: 'Ошибка сервера.' });
     });
 };
 
@@ -50,11 +55,11 @@ const updateUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
+        res.status(ErrorCode).send({ message: err.message });
       } else if (err.name === 'CastError') {
-        res.status(404).send({ message: 'Пользователь с указанным _id не найден.' });
+        res.status(NotFound).send({ message: 'Пользователь с указанным _id не найден.' });
       } else {
-        res.status(500).send({ message: 'Ошибка сервера.' });
+        res.status(DefaultError).send({ message: 'Ошибка сервера.' });
       }
     });
 };
@@ -73,11 +78,11 @@ const updateAvatar = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные при обновлении аватара.' });
+        res.status(ErrorCode).send({ message: err.message });
       } else if (err.name === 'CastError') {
-        res.status(404).send({ message: 'Пользователь с указанным _id не найден.' });
+        res.status(NotFound).send({ message: 'Пользователь с указанным _id не найден.' });
       } else {
-        res.status(500).send({ message: 'Ошибка сервера.' });
+        res.status(DefaultError).send({ message: 'Ошибка сервера.' });
       }
     });
 };

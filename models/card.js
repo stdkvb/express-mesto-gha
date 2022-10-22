@@ -5,8 +5,8 @@ const cardSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
-      minlength: 2,
-      maxlength: 30,
+      minlength: [2, '<2'],
+      maxlength: [30, '>30'],
     },
     link: {
       type: String,
@@ -23,7 +23,7 @@ const cardSchema = new mongoose.Schema(
         ref: 'user',
         required: true,
         default: [],
-      }
+      },
     ],
     createdAt: {
       type: Date,
@@ -32,7 +32,7 @@ const cardSchema = new mongoose.Schema(
   },
   {
     versionKey: false,
-  }
+  },
 );
 
 module.exports = mongoose.model('card', cardSchema);
