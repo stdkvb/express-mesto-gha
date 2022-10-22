@@ -27,4 +27,30 @@ const deleteCard = (req, res) => {
     .catch((err) => res.status(500).send({ message: err.message }));
 };
 
-module.exports = { createCard, getCard, deleteCard };
+const likeCard = (req, res) => {
+  const owner = req.user._id;
+  Card.findOneAndUpdate(req.params.cardId, {$addToSet: {likes: owner}}, { new: true })
+    .then((card) => {
+      if (!card) {
+        res.status(404).send({ message: 'Запрашиваемая карточка не найдена'});
+        return;
+      }
+      res.status(200).send(card);
+    })
+    .catch((err) => res.status(500).send({ message: err.message }));
+};
+
+const disLikeCard = (req, res) => {
+  const owner = req.user._id;
+  Card.findOneAndUpdate(req.params.cardId, {$pull: {likes: owner}}, { new: true })
+    .then((card) => {
+      if (!card) {
+        res.status(404).send({ message: 'Запрашиваемая карточка не найдена'});
+        return;
+      }
+      res.status(200).send(card);
+    })
+    .catch((err) => res.status(500).send({ message: err.message }));
+};
+
+module.exports = { createCard, getCard, deleteCard, likeCard, disLikeCard };
