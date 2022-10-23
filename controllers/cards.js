@@ -42,10 +42,11 @@ const deleteCard = (req, res) => {
 
 const likeCard = (req, res) => {
   const owner = req.user._id;
-  Card.findOneAndUpdate(
+  Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: owner } },
-    { new: true, runValidators: true })
+    { new: true, runValidators: true },
+  )
     .then((card) => {
       if (!card) {
         res.status(NotFound).send({ message: 'Переданы некорректные данные для постановки лайка.' });
@@ -66,10 +67,11 @@ const likeCard = (req, res) => {
 
 const disLikeCard = (req, res) => {
   const owner = req.user._id;
-  Card.findOneAndUpdate(
+  Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: owner } },
-    { new: true, runValidators: true })
+    { new: true, runValidators: true },
+  )
     .then((card) => {
       if (!card) {
         res.status(NotFound).send({ message: 'Переданы некорректные данные для снятия лайка.' });
