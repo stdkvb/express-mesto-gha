@@ -11,7 +11,7 @@ const createCard = (req, res) => {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
-    .then((card) => res.send(card))
+    .then((card) => res.status(201).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(ErrorCode).send({ message: err.message });
@@ -28,7 +28,7 @@ const deleteCard = (req, res) => {
       if (!card) {
         res.status(NotFound).send({ message: 'Переданы некорректные данные при удалении карточки' });
       } else {
-        res.send(card);
+        res.send({ message: 'Карточка удалена'});
       }
     })
     .catch((err) => {
