@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const router = require('./routes');
-const NotFound = require('./errors/errors');
 
 const { PORT = 3000 } = process.env;
 
@@ -25,10 +24,6 @@ app.use((req, res, next) => {
 });
 
 app.use(router);
-
-app.use((req, res) => {
-  res.status(NotFound).send({ message: 'Неправильный путь.' });
-});
 
 app.listen(PORT, '127.0.0.1', () => {
   console.log(`Listening on port ${PORT}`);
