@@ -28,7 +28,7 @@ const deleteCard = (req, res) => {
       if (!card) {
         res.status(NotFound).send({ message: 'Переданы некорректные данные при удалении карточки' });
       } else {
-        res.send({ message: 'Карточка удалена'});
+        res.send({ message: 'Карточка удалена' });
       }
     })
     .catch((err) => {
