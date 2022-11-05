@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const { ErrorCode, NotFound, DefaultError } = require('../errors/errors');
 
@@ -28,16 +29,19 @@ const getUser = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+  const { name, about, avatar, email, password } = req.body;
 
-  User.create({ name, about, avatar })
-    .then((user) => res.status(201).send(user))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(ErrorCode).send({ message: err.message });
-        return;
-      }
-      res.status(DefaultError).send({ message: 'Ошибка сервера.' });
+  bcrypt.hash(password, 10)
+    .then((hash) => {
+      User.create({ name, about, avatar, email, password: hash })
+        .then((user) => res.status(201).send(user))
+        .catch((err) => {
+          if (err.name === 'ValidationError') {
+            res.status(ErrorCode).send({ message: err.message });
+            return;
+          }
+          res.status(DefaultError).send({ message: 'Ошибка сервера.' });
+        });
     });
 };
 
