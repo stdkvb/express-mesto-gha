@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const jsonwebtoken = require('jsonwebtoken');
 const User = require('../models/user');
 const { ErrorCode, NotFound, DefaultError } = require('../errors/errors');
 
@@ -91,6 +92,33 @@ const updateAvatar = (req, res) => {
     });
 };
 
+const login = (req, res) => {
+  const { email, password} = req.body;
+  if (!email || !password) {
+    return res.status(400).send({ message: 'Не переданы email или пароль' });
+  }
+  User.findOne({ email })
+    .then((user) => {
+      if(!user) {
+        return res.status(403).send({ message: 'Такого пользователя не существует' });
+      }
+      bcrypt.compare(password, user.password, (err, isValidPassword) => {
+        if(!isValidPassword) {
+          return res.status(401).send({ message: 'Невереный email или пароль' });
+        }
+        const token = jwt.sign({ _id: user._id }, 'temporary-secret-key', { expresIn: '7d'});
+        res.cookie('jwt', token, {
+          maxAge: 1000 * 60 * 60 * 24 * 7,
+          httpOnly: true,
+        })
+        return res.status(200).send({ 'message': 'Аутентификация выполнена', 'token': token });
+      }
+    })
+    .catch(() => {
+      res.status(401).send({ message: 'Ошибка аутентификации'});
+    })
+}
+
 module.exports = {
-  getUsers, getUser, createUser, updateUser, updateAvatar,
+  getUsers, getUser, createUser, updateUser, updateAvatar, login
 };
