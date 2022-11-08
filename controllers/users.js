@@ -123,6 +123,24 @@ const login = (req, res) => {
     });
 };
 
+const getCurrentUser = (req, res) => {
+  const owner = req.user.id;
+
+  User.findById(owner)
+    .then((user) => {
+      res.send(user);
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(ErrorCode).send({ message: err.message });
+      } else if (err.name === 'CastError') {
+        res.status(NotFound).send({ message: 'Пользователь с указанным _id не найден.' });
+      } else {
+        res.status(DefaultError).send({ message: 'Ошибка сервера.' });
+      }
+    });
+}
+
 module.exports = {
-  getUsers, getUser, createUser, updateUser, updateAvatar, login,
+  getUsers, getUser, createUser, updateUser, updateAvatar, login, getCurrentUser,
 };

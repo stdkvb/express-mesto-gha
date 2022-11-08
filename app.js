@@ -15,14 +15,6 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
 });
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '63542dbc8440c78ceeb60326',
-  };
-
-  next();
-});
-
 app.use(router);
 
 app.listen(PORT, '127.0.0.1', () => {
