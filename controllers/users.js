@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const jsonwebtoken = require('jsonwebtoken');
+const { getJwtToken } = require('../utils/jwt');
 const User = require('../models/user');
 const { ErrorCode, NotFound, DefaultError } = require('../errors/errors');
 
@@ -30,11 +30,15 @@ const getUser = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  const { name, about, avatar, email, password } = req.body;
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
 
   bcrypt.hash(password, 10)
     .then((hash) => {
-      User.create({ name, about, avatar, email, password: hash })
+      User.create({
+        name, about, avatar, email, password: hash,
+      })
         .then((user) => res.status(201).send(user))
         .catch((err) => {
           if (err.name === 'ValidationError') {
@@ -93,32 +97,32 @@ const updateAvatar = (req, res) => {
 };
 
 const login = (req, res) => {
-  const { email, password} = req.body;
+  const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).send({ message: 'Не переданы email или пароль' });
   }
   User.findOne({ email })
     .then((user) => {
-      if(!user) {
+      if (!user) {
         return res.status(403).send({ message: 'Такого пользователя не существует' });
       }
       bcrypt.compare(password, user.password, (err, isValidPassword) => {
-        if(!isValidPassword) {
+        if (!isValidPassword) {
           return res.status(401).send({ message: 'Невереный email или пароль' });
         }
-        const token = jwt.sign({ _id: user._id }, 'temporary-secret-key', { expresIn: '7d'});
+        const token = getJwtToken(user._id);
         res.cookie('jwt', token, {
           maxAge: 1000 * 60 * 60 * 24 * 7,
           httpOnly: true,
-        })
-        return res.status(200).send({ 'message': 'Аутентификация выполнена', 'token': token });
-      }
+        });
+        return res.status(200).send({ message: 'Аутентификация выполнена', 'token': token });
+      });
     })
     .catch(() => {
-      res.status(401).send({ message: 'Ошибка аутентификации'});
-    })
-}
+      res.status(401).send({ message: 'Ошибка аутентификации' });
+    });
+};
 
 module.exports = {
-  getUsers, getUser, createUser, updateUser, updateAvatar, login
+  getUsers, getUser, createUser, updateUser, updateAvatar, login,
 };
