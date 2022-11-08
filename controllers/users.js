@@ -139,7 +139,7 @@ const getCurrentUser = (req, res) => {
         res.status(DefaultError).send({ message: 'Ошибка сервера.' });
       }
     });
-}
+};
 
 module.exports = {
   getUsers, getUser, createUser, updateUser, updateAvatar, login, getCurrentUser,

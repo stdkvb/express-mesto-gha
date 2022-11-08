@@ -24,14 +24,22 @@ const createCard = (req, res) => {
 const deleteCard = (req, res) => {
   const owner = req.user.id;
   const { cardId } = req.params;
-  Card.findByIdAndRemove(cardId)
+  Card.findById(cardId)
     .then((card) => {
       if (!card) {
         res.status(NotFound).send({ message: 'Переданы некорректные данные при удалении карточки' });
-      } else if (owner !== card.owner) {
-        res.status(403).send({ message: 'Нет прав на удаление карточки' });
       } else {
-        res.send({ message: 'Карточка удалена' });
+        if (owner.toString() !== card.owner.toString()) {
+          res.status(403).send({ message: 'Нет прав на удаление карточки' });
+        } else {
+          Card.findByIdAndRemove(cardId)
+            .then(() => {
+              res.send({ message: 'Карточка удалена' });
+            })
+            .catch(() => {
+              res.status(DefaultError).send({ message: 'Ошибка сервера.' });
+            });
+        }
       }
     })
     .catch((err) => {
