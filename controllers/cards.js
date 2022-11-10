@@ -14,12 +14,7 @@ const createCard = (req, res, next) => {
   const owner = req.user.id;
   Card.create({ name, link, owner })
     .then((card) => res.status(201).send(card))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new BadRequestError(err.message));
-      }
-      next(err);
-    });
+    .catch(next);
 };
 
 const deleteCard = (req, res, next) => {
@@ -30,6 +25,7 @@ const deleteCard = (req, res, next) => {
       if (!card) {
         throw new (NotFoundError('Переданы некорректные данные при удалении карточки.'))();
       } else {
+        // eslint-disable-next-line no-lonely-if
         if (owner.toString() !== card.owner.toString()) {
           throw new (ForbiddenError('Нет прав на удаление карточки.'))();
         } else {

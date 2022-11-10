@@ -4,7 +4,6 @@ const User = require('../models/user');
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const NonAuthorisedError = require('../errors/NonAuthorisedError');
-const ForbiddenError = require('../errors/ForbiddenError');
 const ConflictError = require('../errors/ConflictError');
 
 const getUsers = (req, res, next) => {
@@ -65,9 +64,7 @@ const updateUser = (req, res, next) => {
       });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new BadRequestError(err.message));
-      } else if (err.name === 'CastError') {
+      if (err.name === 'CastError') {
         next(new NotFoundError('Пользователь с указанным _id не найден.'));
       } else {
         next(err);
@@ -88,9 +85,7 @@ const updateAvatar = (req, res, next) => {
       });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные для обновления пользователя.'));
-      } else if (err.name === 'CastError') {
+      if (err.name === 'CastError') {
         next(new NotFoundError('Пользователь с указанным _id не найден.'));
       } else {
         next(err);
@@ -110,7 +105,7 @@ const login = (req, res, next) => {
       }
       bcrypt.compare(password, user.password, (err, isValidPassword) => {
         if (!isValidPassword) {
-          next(new NonAuthorisedError('Невереный email или пароль.'));
+          throw NonAuthorisedError('Невереный email или пароль.');
         }
         const token = getJwtToken(user._id);
         res.cookie('jwt', token, {

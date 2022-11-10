@@ -21,7 +21,7 @@ app.use(router);
 app.use(serverError);
 app.use(errors());
 
-app.listen(PORT, '127.0.0.1', () => {
+app.listen(PORT, () => {
   // eslint-disable-next-line no-console
   console.log(`Listening on port ${PORT}`);
 });
