@@ -5,7 +5,7 @@ const NonAuthorisedError = require('../errors/NonAuthorisedError');
 const checkAuthorisation = (req, res, next) => {
   const { authorisation } = req.headers;
   if (!authorisation || !!authorisation.startsWith('Bearer ')) {
-    return next(new NonAuthorisedError('Необходимо авторизоваться.'));
+    next(new NonAuthorisedError('Необходимо авторизоваться.'));
   }
   const token = authorisation.replace('Bearer ', '');
 
@@ -13,7 +13,7 @@ const checkAuthorisation = (req, res, next) => {
   try {
     payload = jwt.verify(token, JWT_SECRET);
   } catch (err) {
-    return next(new NonAuthorisedError('Необходимо авторизоваться'));
+    next(new NonAuthorisedError('Необходимо авторизоваться'));
   }
 
   req.user = payload;

@@ -5,6 +5,7 @@ const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const NonAuthorisedError = require('../errors/NonAuthorisedError');
 const ForbiddenError = require('../errors/ForbiddenError');
+const ConflictError = require('../errors/ConflictError');
 
 const getUsers = (req, res, next) => {
   User.find({})
@@ -18,16 +19,10 @@ const getUser = (req, res, next) => {
   User.findById(userId)
     .then((user) => {
       if (!user) {
-        next(new NotFoundError('Пользователь по указанному _id не найден.'));
+        throw new NotFoundError('Пользователь по указанному _id не найден.');
       } res.send(user);
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('Пользователь по указанному _id не найден.'));
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 const createUser = (req, res, next) => {
@@ -40,15 +35,21 @@ const createUser = (req, res, next) => {
       User.create({
         name, about, avatar, email, password: hash,
       })
-        .then((user) => res.status(201).send(user))
+        .then(() => res.status(201).send({
+          name,
+          about,
+          email,
+          avatar,
+        }))
         .catch((err) => {
-          if (err.name === 'ValidationError') {
-            next(new BadRequestError('Переданы некорректные данные для создания пользователя.'));
+          if (err.code === 11000) {
+            next(new ConflictError('Пользователь с таким email уже существует.'));
           } else {
             next(err);
           }
         });
-    });
+    })
+    .catch(next);
 };
 
 const updateUser = (req, res, next) => {
@@ -102,10 +103,10 @@ const login = (req, res, next) => {
   if (!email || !password) {
     next(new BadRequestError('Не переданы email или пароль.'));
   }
-  User.findOne({ email })
+  User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        throw new ForbiddenError('Такого пользователя не существует.');
+        throw new NonAuthorisedError('Такого пользователя не существует.');
       }
       bcrypt.compare(password, user.password, (err, isValidPassword) => {
         if (!isValidPassword) {

@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { errors } = require('celebrate');
 const router = require('./routes');
 const serverError = require('./middlewares/serverError');
 
@@ -18,6 +19,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 
 app.use(router);
 app.use(serverError);
+app.use(errors());
 
 app.listen(PORT, '127.0.0.1', () => {
   // eslint-disable-next-line no-console
