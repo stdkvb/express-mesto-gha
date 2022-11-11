@@ -6,99 +6,99 @@ const BadRequestError = require('../errors/BadRequestError');
 const NonAuthorisedError = require('../errors/NonAuthorisedError');
 const ConflictError = require('../errors/ConflictError');
 
-const getUsers = (req, res, next) => {
+const getUsers = (request, response, next) => {
   User.find({})
-    .then((users) => res.send(users))
+    .then((users) => response.send(users))
     .catch(next);
 };
 
-const getUser = (req, res, next) => {
-  const { userId } = req.params.userId;
+const getUser = (request, response, next) => {
+  const { userId } = request.params.userId;
   User.findById(userId)
     .then((user) => {
       if (!user) {
         throw new NotFoundError('Пользователь по указанному _id не найден.');
-      } res.send(user);
+      } response.send(user);
     })
     .catch(next);
 };
 
-const createUser = (req, res, next) => {
+const createUser = (request, response, next) => {
   const {
     name, about, avatar, email, password,
-  } = req.body;
+  } = request.body;
 
   bcrypt.hash(password, 10)
     .then((hash) => {
       User.create({
         name, about, avatar, email, password: hash,
       })
-        .then(() => res.status(201).send({
+        .then(() => response.status(201).send({
           name,
           about,
           email,
           avatar,
         }))
-        .catch((err) => {
-          if (err.code === 11000) {
+        .catch((error) => {
+          if (error.code === 11000) {
             next(new ConflictError('Пользователь с таким email уже существует.'));
-          } else if (err.name === 'ValidationError') {
+          } else if (error.name === 'ValidationError') {
             next(new BadRequestError('Некорректные данные при создании пользователяю'));
           } else {
-            next(err);
+            next(error);
           }
         });
     })
     .catch(next);
 };
 
-const updateUser = (req, res, next) => {
-  const owner = req.user.id;
-  const { name, about } = req.body;
+const updateUser = (request, response, next) => {
+  const owner = request.user.id;
+  const { name, about } = request.body;
   User.findByIdAndUpdate(owner, { name, about }, { runValidators: true, new: true })
     .then((user) => {
-      res.send({
+      response.send({
         _id: owner,
         name,
         about,
         avatar: user.avatar,
       });
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
+    .catch((error) => {
+      if (error.name === 'ValidationError') {
         next(new BadRequestError('Некорректные данные при обновлении пользователя.'));
       } else {
-        next(err);
+        next(error);
       }
     });
 };
 
-const updateAvatar = (req, res, next) => {
-  const owner = req.user._id;
-  const { avatar } = req.body;
+const updateAvatar = (request, response, next) => {
+  const owner = request.user._id;
+  const { avatar } = request.body;
   User.findByIdAndUpdate(owner, { avatar }, { runValidators: true, new: true })
     .then((user) => {
       if (!user) {
         throw new NotFoundError('Нет такого пользователя в базе.');
       }
-      res.send({
+      response.send({
         _id: owner,
         name: user.name,
         about: user.about,
         avatar,
       });
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
+    .catch((error) => {
+      if (error.name === 'ValidationError') {
         next(new BadRequestError('Некорректные данные при обновлении аватара.'));
       } else {
-        next(err);
+        next(error);
       }
     });
 };
 
-const login = (req, res, next) => {
-  const { email, password } = req.body;
+const login = (request, response, next) => {
+  const { email, password } = request.body;
   if (!email || !password) {
     next(new BadRequestError('Не переданы email или пароль.'));
   }
@@ -107,27 +107,27 @@ const login = (req, res, next) => {
       if (!user) {
         throw new NonAuthorisedError('Такого пользователя не существует.');
       }
-      bcrypt.compare(password, user.password, (err, isValidPassword) => {
+      bcrypt.compare(password, user.password, (error, isValidPassword) => {
         if (!isValidPassword) {
           throw NonAuthorisedError('Невереный email или пароль.');
         }
         const token = getJwtToken(user._id);
-        res.cookie('jwt', token, {
+        response.cookie('jwt', token, {
           maxAge: 1000 * 60 * 60 * 24 * 7,
           httpOnly: true,
         });
-        return res.status(200).send({ message: 'Аутентификация выполнена', token });
+        return response.status(200).send({ message: 'Аутентификация выполнена', token });
       });
     })
     .catch(next);
 };
 
-const getCurrentUser = (req, res, next) => {
-  const owner = req.user.id;
+const getCurrentUser = (request, response, next) => {
+  const owner = request.user.id;
 
   User.findById(owner)
     .then((user) => {
-      res.send(user);
+      response.send(user);
     })
     .catch(next);
 };

@@ -3,54 +3,54 @@ const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const ForbiddenError = require('../errors/ForbiddenError');
 
-const getCards = (req, res, next) => {
+const getCards = (request, response, next) => {
   Card.find({})
-    .then((cards) => res.send(cards))
+    .then((cards) => response.send(cards))
     .catch(next);
 };
 
-const createCard = (req, res, next) => {
-  const { name, link } = req.body;
-  const owner = req.user.id;
+const createCard = (request, response, next) => {
+  const { name, link } = request.body;
+  const owner = request.user.id;
   Card.create({ name, link, owner })
-    .then((card) => res.status(201).send(card))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
+    .then((card) => response.status(201).send(card))
+    .catch((error) => {
+      if (error.name === 'ValidationError') {
         next(new BadRequestError('Некорректные данные при создании карточки.'));
       } else {
-        next(err);
+        next(error);
       }
     });
 };
 
-const deleteCard = (req, res, next) => {
-  const owner = req.user.id;
-  Card.findById(req.params.cardId)
+const deleteCard = (request, response, next) => {
+  const owner = request.user.id;
+  Card.findById(request.params.cardId)
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Переданы некорректные данные при удалении карточки.');
       } else if (owner.toString() !== card.owner.toString()) {
         throw new ForbiddenError('Нет прав на удаление карточки.');
       } else {
-        Card.findByIdAndRemove(req.params.cardId)
+        Card.findByIdAndRemove(request.params.cardId)
           .then(() => {
-            res.send({ message: 'Карточка удалена' });
+            response.send({ message: 'Карточка удалена' });
           })
           .catch(next);
       }
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
+    .catch((error) => {
+      if (error.name === 'CastError') {
         next(new BadRequestError('Карточка с указанным _id не найдена.'));
       }
-      next(err);
+      next(error);
     });
 };
 
-const likeCard = (req, res, next) => {
-  const owner = req.user.id;
+const likeCard = (request, response, next) => {
+  const owner = request.user.id;
   Card.findByIdAndUpdate(
-    req.params.cardId,
+    request.params.cardId,
     { $addToSet: { likes: owner } },
     { new: true, runValidators: true },
   )
@@ -58,24 +58,24 @@ const likeCard = (req, res, next) => {
       if (!card) {
         throw new NotFoundError('Переданы некорректные данные для постановки лайка.');
       } else {
-        res.send(card);
+        response.send(card);
       }
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
+    .catch((error) => {
+      if (error.name === 'CastError') {
         next(new BadRequestError('Передан несуществующий _id карточки.'));
-      } else if (err.name === 'ValidationError') {
-        next(new BadRequestError(err.message));
+      } else if (error.name === 'ValidationError') {
+        next(new BadRequestError(error.message));
       } else {
-        next(err);
+        next(error);
       }
     });
 };
 
-const disLikeCard = (req, res, next) => {
-  const owner = req.user.id;
+const disLikeCard = (request, response, next) => {
+  const owner = request.user.id;
   Card.findByIdAndUpdate(
-    req.params.cardId,
+    request.params.cardId,
     { $pull: { likes: owner } },
     { new: true, runValidators: true },
   )
@@ -83,16 +83,16 @@ const disLikeCard = (req, res, next) => {
       if (!card) {
         throw new NotFoundError('Переданы некорректные данные для снятия лайка.');
       } else {
-        res.send(card);
+        response.send(card);
       }
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
+    .catch((error) => {
+      if (error.name === 'CastError') {
         next(new BadRequestError('Передан несуществующий _id карточки.'));
-      } else if (err.name === 'ValidationError') {
-        next(new BadRequestError(err.message));
+      } else if (error.name === 'ValidationError') {
+        next(new BadRequestError(error.message));
       } else {
-        next(err);
+        next(error);
       }
     });
 };
