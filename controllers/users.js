@@ -63,13 +63,7 @@ const updateUser = (req, res, next) => {
         avatar: user.avatar,
       });
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new NotFoundError('Пользователь с указанным _id не найден.'));
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 const updateAvatar = (req, res, next) => {
@@ -84,13 +78,7 @@ const updateAvatar = (req, res, next) => {
         avatar,
       });
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new NotFoundError('Пользователь с указанным _id не найден.'));
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 const login = (req, res, next) => {
@@ -125,15 +113,7 @@ const getCurrentUser = (req, res, next) => {
     .then((user) => {
       res.send(user);
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные для обновления пользователя.'));
-      } else if (err.name === 'CastError') {
-        next(new NotFoundError('Пользователь с указанным _id не найден.'));
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 module.exports = {
