@@ -74,7 +74,7 @@ const updateUser = (request, response, next) => {
 };
 
 const updateAvatar = (request, response, next) => {
-  const owner = request.user._id;
+  const owner = request.user.id;
   const { avatar } = request.body;
   User.findByIdAndUpdate(owner, { avatar }, { runValidators: true, new: true })
     .then((user) => {

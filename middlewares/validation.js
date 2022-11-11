@@ -35,8 +35,20 @@ const updateAvatarValidation = celebrate({
 
 const createCardValidation = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
+    name: Joi.string().required().min(2).max(30),
     link: Joi.string().required().pattern(linkRegEx),
+  }),
+});
+
+const userIdValidation = celebrate({
+  params: Joi.object().keys({
+    userId: Joi.string().length(24).hex(),
+  }),
+});
+
+const cardIdValidation = celebrate({
+  params: Joi.object().keys({
+    userId: Joi.string().length(24).hex(),
   }),
 });
 
@@ -46,4 +58,6 @@ module.exports = {
   updateAvatarValidation,
   updateUserValidation,
   createCardValidation,
+  userIdValidation,
+  cardIdValidation,
 };
