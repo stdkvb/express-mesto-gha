@@ -2,10 +2,11 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
-const router = require('./routes');
-const serverError = require('./middlewares/serverError');
 
 const { PORT = 3000 } = process.env;
+
+const router = require('./routes');
+const serverError = require('./middlewares/serverError');
 
 const app = express();
 

@@ -43,6 +43,8 @@ const createUser = (req, res, next) => {
         .catch((err) => {
           if (err.code === 11000) {
             next(new ConflictError('Пользователь с таким email уже существует.'));
+          } else if (err.name === 'ValidationError') {
+            next(new BadRequestError('Некорректные данные при создании пользователяю'));
           } else {
             next(err);
           }
@@ -63,7 +65,13 @@ const updateUser = (req, res, next) => {
         avatar: user.avatar,
       });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Некорректные данные при обновлении пользователя.'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 const updateAvatar = (req, res, next) => {
@@ -78,7 +86,13 @@ const updateAvatar = (req, res, next) => {
         avatar,
       });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Некорректные данные при обновлении аватара.'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 const login = (req, res, next) => {
