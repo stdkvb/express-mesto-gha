@@ -40,24 +40,10 @@ const createCardValidation = celebrate({
   }),
 });
 
-const userIdValidation = celebrate({
-  params: Joi.object().keys({
-    userId: Joi.string().length(24).hex(),
-  }),
-});
-
-const cardIdValidation = celebrate({
-  params: Joi.object().keys({
-    userId: Joi.string().length(24).hex(),
-  }),
-});
-
 module.exports = {
   createUserValidation,
   loginValidation,
   updateAvatarValidation,
   updateUserValidation,
   createCardValidation,
-  userIdValidation,
-  cardIdValidation,
 };

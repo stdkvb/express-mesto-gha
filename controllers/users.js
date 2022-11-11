@@ -13,7 +13,7 @@ const getUsers = (request, response, next) => {
 };
 
 const getUser = (request, response, next) => {
-  const { userId } = request.params.userId;
+  const { userId } = request.params;
   User.findById(userId)
     .then((user) => {
       if (!user) {
