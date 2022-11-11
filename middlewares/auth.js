@@ -3,11 +3,11 @@ const { JWT_SECRET } = require('../utils/jwt');
 const NonAuthorisedError = require('../errors/NonAuthorisedError');
 
 const checkAuthorisation = (request, response, next) => {
-  const { authorisation } = request.headers;
-  if (!authorisation || !!authorisation.startsWith('Bearer ')) {
+  const { authorization } = request.headers;
+  if (!authorization || !!authorization.startsWith('Bearer ')) {
     next(new NonAuthorisedError('Необходимо авторизоваться.'));
   }
-  const token = authorisation.replace('Bearer ', '');
+  const token = authorization.replace('Bearer ', '');
 
   let payload;
   try {

@@ -10,7 +10,7 @@ router.use(checkAuthorisation);
 router.use('/users', userRouter);
 router.use('/cards', cardRouter);
 
-router.use((req, res, next) => {
+router.use((request, response, next) => {
   next(new NotFoundError('Неправильный путь.'));
 });
 
