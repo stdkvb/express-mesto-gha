@@ -4,7 +4,7 @@ const {
 } = require('../controllers/cards');
 const { createCardValidation } = require('../middlewares/validation');
 
-router.post('/', createCard, createCardValidation);
+router.post('/', createCardValidation, createCard);
 router.delete('/:cardId', deleteCard);
 router.get('/', getCards);
 router.put('/:cardId/likes', likeCard);

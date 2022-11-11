@@ -7,7 +7,7 @@ const { updateUserValidation, updateAvatarValidation } = require('../middlewares
 router.get('/', getUsers);
 router.get('/:userId', getUser);
 router.get('/me', getCurrentUser);
-router.patch('/me', updateUser, updateUserValidation);
-router.patch('/me/avatar', updateAvatar, updateAvatarValidation);
+router.patch('/me', updateUserValidation, updateUser);
+router.patch('/me/avatar', updateAvatarValidation, updateAvatar);
 
 module.exports = router;
