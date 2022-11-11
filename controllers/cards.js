@@ -14,27 +14,29 @@ const createCard = (req, res, next) => {
   const owner = req.user.id;
   Card.create({ name, link, owner })
     .then((card) => res.status(201).send(card))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Некорректные данные при создании карточки.'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 const deleteCard = (req, res, next) => {
   const owner = req.user.id;
-  const { cardId } = req.params;
-  Card.findById(cardId)
+  Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        throw new (NotFoundError('Переданы некорректные данные при удалении карточки.'))();
+        throw new NotFoundError('Переданы некорректные данные при удалении карточки.');
+      } else if (owner.toString() !== card.owner.toString()) {
+        throw new ForbiddenError('Нет прав на удаление карточки.');
       } else {
-        // eslint-disable-next-line no-lonely-if
-        if (owner.toString() !== card.owner.toString()) {
-          throw new (ForbiddenError('Нет прав на удаление карточки.'))();
-        } else {
-          Card.findByIdAndRemove(cardId)
-            .then(() => {
-              res.send({ message: 'Карточка удалена' });
-            })
-            .catch(next);
-        }
+        Card.findByIdAndRemove(req.params.cardId)
+          .then(() => {
+            res.send({ message: 'Карточка удалена' });
+          })
+          .catch(next);
       }
     })
     .catch((err) => {
@@ -79,7 +81,7 @@ const disLikeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        throw new (NotFoundError('Переданы некорректные данные для снятия лайка.'))();
+        throw new NotFoundError('Переданы некорректные данные для снятия лайка.');
       } else {
         res.send(card);
       }

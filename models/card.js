@@ -11,6 +11,10 @@ const cardSchema = new mongoose.Schema(
     link: {
       type: String,
       required: true,
+      validate: {
+        validator: (link) => validator.isURL(link),
+        message: 'Неверный формат записи ссылки на аватар',
+      },
     },
     owner: {
       type: mongoose.Schema.Types.ObjectId,

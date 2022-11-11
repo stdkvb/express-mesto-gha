@@ -13,8 +13,7 @@ const getUsers = (req, res, next) => {
 };
 
 const getUser = (req, res, next) => {
-  const { userId } = req.params;
-
+  const { userId } = req.params.userId;
   User.findById(userId)
     .then((user) => {
       if (!user) {
@@ -79,6 +78,9 @@ const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(owner, { avatar }, { runValidators: true, new: true })
     .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Нет такого пользователя в базе.');
+      }
       res.send({
         _id: owner,
         name: user.name,
