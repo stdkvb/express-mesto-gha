@@ -55,8 +55,11 @@ const createUser = (request, response, next) => {
 const updateUser = (request, response, next) => {
   const owner = request.user.id;
   const { name, about } = request.body;
-  User.findByIdAndUpdate(owner, { name, about }, { runValidators: true, new: true })
+  User.findByIdAndUpdate(owner, { name, about }, { runValidators: true })
     .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Нет такого пользователя в базе.');
+      }
       response.send({
         _id: owner,
         name,
@@ -76,7 +79,7 @@ const updateUser = (request, response, next) => {
 const updateAvatar = (request, response, next) => {
   const owner = request.user.id;
   const { avatar } = request.body;
-  User.findByIdAndUpdate(owner, { avatar }, { runValidators: true, new: true })
+  User.findByIdAndUpdate(owner, { avatar }, { runValidators: true })
     .then((user) => {
       if (!user) {
         throw new NotFoundError('Нет такого пользователя в базе.');
@@ -99,25 +102,24 @@ const updateAvatar = (request, response, next) => {
 
 const login = (request, response, next) => {
   const { email, password } = request.body;
-  if (!email || !password) {
-    next(new BadRequestError('Не переданы email или пароль.'));
-  }
+
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
         throw new NonAuthorisedError('Такого пользователя не существует.');
       }
-      bcrypt.compare(password, user.password, (error, isValidPassword) => {
-        if (!isValidPassword) {
-          throw NonAuthorisedError('Невереный email или пароль.');
-        }
-        const token = getJwtToken(user._id);
-        response.cookie('jwt', token, {
-          maxAge: 1000 * 60 * 60 * 24 * 7,
-          httpOnly: true,
+      return bcrypt.compare(password, user.password)
+        .then((isValidPassword) => {
+          if (!isValidPassword) {
+            throw NonAuthorisedError('Невереный email или пароль.');
+          }
+          const token = getJwtToken(user._id);
+          response.cookie('jwt', token, {
+            maxAge: 1000 * 60 * 60 * 24 * 7,
+            httpOnly: true,
+          });
+          return response.send({ message: 'Аутентификация выполнена', token });
         });
-        return response.status(200).send({ message: 'Аутентификация выполнена', token });
-      });
     })
     .catch(next);
 };

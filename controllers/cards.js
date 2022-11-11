@@ -25,7 +25,8 @@ const createCard = (request, response, next) => {
 
 const deleteCard = (request, response, next) => {
   const owner = request.user.id;
-  Card.findById(request.params.cardId)
+  const { cardId } = request.params;
+  Card.findById(cardId)
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Переданы некорректные данные при удалении карточки.');
@@ -49,8 +50,9 @@ const deleteCard = (request, response, next) => {
 
 const likeCard = (request, response, next) => {
   const owner = request.user.id;
+  const { cardId } = request.params;
   Card.findByIdAndUpdate(
-    request.params.cardId,
+    cardId,
     { $addToSet: { likes: owner } },
     { new: true, runValidators: true },
   )
@@ -74,8 +76,9 @@ const likeCard = (request, response, next) => {
 
 const disLikeCard = (request, response, next) => {
   const owner = request.user.id;
+  const { cardId } = request.params;
   Card.findByIdAndUpdate(
-    request.params.cardId,
+    cardId,
     { $pull: { likes: owner } },
     { new: true, runValidators: true },
   )
