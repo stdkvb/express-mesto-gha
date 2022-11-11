@@ -4,7 +4,7 @@ const NonAuthorisedError = require('../errors/NonAuthorisedError');
 
 const checkAuthorisation = (request, response, next) => {
   const { authorization } = request.headers;
-  if (!authorization || !!authorization.startsWith('Bearer ')) {
+  if (!authorization || !authorization.startsWith('Bearer ')) {
     next(new NonAuthorisedError('Необходимо авторизоваться.'));
   }
   const token = authorization.replace('Bearer ', '');
