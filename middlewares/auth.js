@@ -5,7 +5,7 @@ const NonAuthorisedError = require('../errors/NonAuthorisedError');
 const checkAuthorisation = (request, response, next) => {
   const { authorization } = request.headers;
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    next(new NonAuthorisedError('Необходимо авторизоваться.'));
+    throw new NonAuthorisedError('Необходимо авторизоваться.');
   }
   const token = authorization.replace('Bearer ', '');
 
@@ -21,4 +21,8 @@ const checkAuthorisation = (request, response, next) => {
   next();
 };
 
-module.exports = { checkAuthorisation };
+const signout = (request, response) => {
+  response.clearCookie('jwt').send({ message: 'Выход.' });
+};
+
+module.exports = { checkAuthorisation, signout };

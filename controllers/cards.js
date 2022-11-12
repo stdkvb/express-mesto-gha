@@ -33,16 +33,14 @@ const deleteCard = (request, response, next) => {
       } else if (owner.toString() !== card.owner.toString()) {
         throw new ForbiddenError('Нет прав на удаление карточки.');
       } else {
-        Card.findByIdAndRemove(request.params.cardId)
-          .then(() => {
-            response.send({ message: 'Карточка удалена' });
-          })
-          .catch(next);
+        return card.remove()
+          .then(() => response.send({ message: 'Карточка удалена.' }));
       }
     })
+    // eslint-disable-next-line consistent-return
     .catch((error) => {
       if (error.name === 'CastError') {
-        next(new BadRequestError('Карточка с указанным _id не найдена.'));
+        return next(new BadRequestError('Карточка с указанным _id не найдена.'));
       }
       next(error);
     });

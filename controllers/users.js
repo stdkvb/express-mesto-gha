@@ -111,7 +111,7 @@ const login = (request, response, next) => {
       return bcrypt.compare(password, user.password)
         .then((isValidPassword) => {
           if (!isValidPassword) {
-            throw NonAuthorisedError('Невереный email или пароль.');
+            throw new NonAuthorisedError('Невереный email или пароль.');
           }
           const token = getJwtToken(user._id);
           response.cookie('jwt', token, {
