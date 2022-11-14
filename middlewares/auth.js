@@ -21,8 +21,4 @@ const checkAuthorisation = (request, response, next) => {
   next();
 };
 
-const signout = (request, response) => {
-  response.clearCookie('jwt').send({ message: 'Выход.' });
-};
-
-module.exports = { checkAuthorisation, signout };
+module.exports = { checkAuthorisation };
